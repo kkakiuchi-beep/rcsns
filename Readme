@@ -1,0 +1,118 @@
+# NEXUS — 社内SNS
+
+社内向けSNSアプリ。Twitter風の投稿・コメント・画像共有・DM・ファイル管理機能を搭載。  
+スマホ最適化（iPhone・Android対応）の純粋なHTML/CSS/JSで構成されています。
+
+---
+
+## 📁 ファイル構成
+
+```
+nexus-sns/
+├── index.html        # タイムライン（メイン）
+├── messages.html     # メッセージ（DM・グループチャット）
+├── files.html        # ファイル管理
+└── README.md
+```
+
+---
+
+## 🚀 GitHub Pages へのデプロイ手順
+
+### 1. リポジトリ作成
+
+```bash
+git init
+git add .
+git commit -m "Initial commit: NEXUS social app"
+```
+
+GitHubでリポジトリを作成（例: `nexus-sns`）し、プッシュ：
+
+```bash
+git remote add origin https://github.com/ユーザー名/nexus-sns.git
+git branch -M main
+git push -u origin main
+```
+
+### 2. GitHub Pages 設定
+
+1. GitHubリポジトリ → **Settings** → **Pages**
+2. Source: `Deploy from a branch`
+3. Branch: `main` / `/ (root)`
+4. **Save** をクリック
+
+数分後、以下のURLでアクセス可能になります：  
+`https://ユーザー名.github.io/nexus-sns/`
+
+---
+
+## ✨ 機能一覧
+
+### タイムライン（index.html）
+- ストーリーレール（アバター一覧）
+- 投稿コンポーザー（テキスト・画像・ファイル添付）
+- フィードタブ（タイムライン・注目・フォロー中）
+- カテゴリフィルター（#タグ）
+- いいね・コメント・リシェア・シェア
+- リアルタイム投稿追加（JS）
+
+### メッセージ（messages.html）
+- グループチャット一覧
+- ダイレクトメッセージ一覧（未読バッジ付き）
+- チャット画面（吹き出しUI）
+- 画像・ファイル送信（プレビュー）
+- 送信後自動返信デモ
+
+### ファイル（files.html）
+- ストレージ使用量グラフ
+- フォルダ管理
+- ファイルアップロード（ドラッグ&ドロップ対応）
+- リスト・グリッド表示切り替え
+- カテゴリフィルター
+
+---
+
+## 📱 スマホ対応
+
+- `viewport-fit=cover` でノッチ・セーフエリア対応
+- `env(safe-area-inset-bottom)` でホームバー考慮
+- タッチ最適化（タップハイライト除去・大きなタップ領域）
+- iOS Safari / Android Chrome 動作確認済み
+
+---
+
+## 🎨 デザイン
+
+- **カラー**: ネイビーブルー〜アクアブルーグラデーション
+- **フォント**: Sora（英数）+ Noto Sans JP（日本語）
+- **ガラスモーフィズム**: backdrop-filter blur
+- **アニメーション**: slideUp、heartPop など CSS アニメーション
+
+---
+
+## 🔧 カスタマイズ
+
+`:root` の CSS 変数を変更することで、カラーテーマを簡単に調整できます：
+
+```css
+:root {
+  --blue-500: #1d5fa8;  /* メインカラー */
+  --accent:   #4facfe;  /* アクセントカラー */
+}
+```
+
+---
+
+## 📝 今後の拡張候補
+
+- [ ] バックエンド連携（Firebase / Supabase）
+- [ ] 認証機能（社内SSO）
+- [ ] プッシュ通知
+- [ ] 検索機能
+- [ ] プロフィールページ
+- [ ] コメントスレッド展開
+
+---
+
+> Made with ❤️ — NEXUS Internal SNS
