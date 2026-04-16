@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>RCSN — 社内SNS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue-900: #0a1628;
+  --blue-800: #0d1f3c;
+  --blue-700: #112d54;
+  --blue-600: #1a3f73;
+  --blue-500: #1d5fa8;
+  --blue-400: #2979d4;
+  --blue-300: #5599e8;
+  --blue-200: #93bff5;
+  --blue-100: #dceeff;
+  --accent: #4facfe;
+  --accent-glow: rgba(79, 172, 254, 0.25);
+  --white: #ffffff;
+  --gray-100: #f0f4ff;
+  --gray-200: #e2eaf8;
+  --gray-300: #c8d6f0;
+  --gray-400: #9bb0d4;
+  --gray-500: #6b85aa;
+  --text-primary: #0d1f3c;
+  --text-secondary: #4a6080;
+  --text-muted: #7a90aa;
+  --bg-main: #f4f7ff;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --border: rgba(26, 63, 115, 0.1);
+  --shadow: 0 2px 20px rgba(13, 31, 60, 0.08);
+  --shadow-hover: 0 8px 40px rgba(13, 31, 60, 0.14);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --nav-height: 60px;
+  --bottom-nav-height: 68px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans JP', 'Sora', sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+}
+
+/* ── TOP NAV ── */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-height);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+}
+
+.nav-logo {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px; font-weight: 700;
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.nav-logo span { font-weight: 300; }
+
+.nav-actions { display: flex; align-items: center; gap: 8px; }
+
+.nav-btn {
+  width: 38px; height: 38px;
+  border: none; background: var(--gray-100);
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue-600); font-size: 18px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.nav-btn:hover { background: var(--blue-100); color: var(--blue-500); }
+
+.nav-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 14px; font-weight: 600;
+  cursor: pointer; border: 2px solid var(--blue-200);
+  font-family: 'Sora', sans-serif;
+}
+
+/* ── MAIN LAYOUT ── */
+.main-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(var(--nav-height) + 16px) 16px 16px;
+}
+
+/* ── STORY RAIL ── */
+.story-rail {
+  display: flex; gap: 12px;
+  overflow-x: auto; padding-bottom: 4px;
+  margin-bottom: 20px;
+  scrollbar-width: none;
+}
+.story-rail::-webkit-scrollbar { display: none; }
+
+.story-item {
+  flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer;
+}
+
+.story-ring {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  padding: 2.5px;
+  background: linear-gradient(135deg, var(--blue-400), var(--accent));
+}
+
+.story-avatar {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  background: var(--gray-200);
+  border: 2.5px solid white;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  color: var(--blue-600);
+}
+
+.story-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.story-label {
+  font-size: 11px; color: var(--text-secondary);
+  text-align: center; width: 64px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.story-add .story-ring {
+  background: var(--gray-200);
+}
+.story-add .story-avatar {
+  background: var(--blue-100);
+  font-size: 22px; color: var(--blue-400);
+}
+
+/* ── POST COMPOSER ── */
+.composer {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.composer-top {
+  display: flex; gap: 12px; margin-bottom: 12px;
+}
+
+.composer-avatar {
+  width: 40px; height: 40px; flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 14px; font-weight: 600;
+  font-family: 'Sora', sans-serif;
+}
+
+.composer-input {
+  flex: 1;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 20px;
+  padding: 10px 16px;
+  font-size: 14px; color: var(--text-primary);
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--gray-100);
+  outline: none; resize: none;
+  line-height: 1.5; min-height: 42px;
+  transition: all 0.2s;
+}
+.composer-input:focus {
+  border-color: var(--blue-400);
+  background: white;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.composer-input::placeholder { color: var(--text-muted); }
+
+.composer-actions {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.composer-tools { display: flex; gap: 4px; }
+
+.tool-btn {
+  width: 36px; height: 36px;
+  border: none; background: none;
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; color: var(--blue-400);
+  transition: all 0.2s;
+}
+.tool-btn:hover { background: var(--blue-100); }
+
+.post-btn {
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  color: white; border: none;
+  padding: 9px 22px; border-radius: 20px;
+  font-size: 14px; font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer; letter-spacing: 0.3px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(41, 121, 212, 0.35);
+}
+.post-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(41, 121, 212, 0.45); }
+.post-btn:active { transform: translateY(0); }
+
+/* ── FEED TABS ── */
+.feed-tabs {
+  display: flex; gap: 0;
+  background: white;
+  border-radius: var(--radius);
+  padding: 5px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.tab-btn {
+  flex: 1; padding: 9px 8px;
+  border: none; background: none;
+  border-radius: 11px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  color: white;
+  box-shadow: 0 3px 10px rgba(41, 121, 212, 0.3);
+}
+
+/* ── POST CARD ── */
+.post-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  animation: slideUp 0.3s ease both;
+  transition: box-shadow 0.2s;
+}
+.post-card:hover { box-shadow: var(--shadow-hover); }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.post-card:nth-child(1) { animation-delay: 0.05s; }
+.post-card:nth-child(2) { animation-delay: 0.10s; }
+.post-card:nth-child(3) { animation-delay: 0.15s; }
+.post-card:nth-child(4) { animation-delay: 0.20s; }
+
+.post-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+
+.post-avatar {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  color: white;
+}
+
+.post-meta { flex: 1; }
+.post-name { font-size: 15px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
+.post-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: flex; gap: 6px; align-items: center; }
+.post-dept {
+  background: var(--blue-100); color: var(--blue-500);
+  padding: 1px 8px; border-radius: 20px; font-size: 11px; font-weight: 500;
+}
+
+.post-more {
+  width: 30px; height: 30px;
+  border: none; background: none;
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); font-size: 18px;
+  transition: all 0.2s;
+}
+.post-more:hover { background: var(--gray-100); color: var(--text-primary); }
+
+.post-body {
+  font-size: 14.5px; line-height: 1.7;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.post-tag {
+  color: var(--blue-400); font-weight: 500;
+}
+
+.post-image {
+  width: 100%; border-radius: var(--radius-sm);
+  overflow: hidden; margin-bottom: 12px;
+  background: var(--gray-100);
+}
+.post-image img { width: 100%; display: block; border-radius: var(--radius-sm); }
+
+.post-image-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4px; border-radius: var(--radius-sm); overflow: hidden;
+  margin-bottom: 12px;
+}
+.post-image-grid img { width: 100%; height: 130px; object-fit: cover; display: block; }
+
+.post-link-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden; margin-bottom: 12px;
+  cursor: pointer; transition: all 0.2s;
+}
+.post-link-card:hover { border-color: var(--blue-300); }
+.link-card-body { padding: 12px; }
+.link-card-domain { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.link-card-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+
+.post-footer {
+  display: flex; align-items: center; gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.action-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 5px; padding: 7px 4px;
+  border: none; background: none;
+  border-radius: 10px;
+  font-size: 12px; color: var(--text-muted);
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.action-btn:hover { background: var(--gray-100); color: var(--text-primary); }
+.action-btn .icon { font-size: 17px; }
+.action-btn.liked { color: #e0394b; }
+.action-btn.liked .icon { animation: heartPop 0.3s ease; }
+
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; padding: 10px 0;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 10px; font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer; border: none; background: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  position: relative;
+}
+
+.nav-item .n-icon { font-size: 22px; transition: transform 0.2s; }
+.nav-item.active { color: var(--blue-500); }
+.nav-item.active .n-icon { transform: scale(1.1); }
+
+.nav-item.active::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 32px; height: 3px;
+  background: linear-gradient(90deg, var(--blue-500), var(--accent));
+  border-radius: 0 0 3px 3px;
+}
+
+.nav-post-btn {
+  width: 50px; height: 50px;
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: white;
+  box-shadow: 0 4px 20px rgba(41, 121, 212, 0.45);
+  border: none; cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.nav-post-btn:hover { transform: scale(1.05); }
+.nav-post-btn:active { transform: scale(0.95); }
+
+/* Badge */
+.badge {
+  position: absolute; top: 6px; right: calc(50% - 14px);
+  background: #e0394b; color: white;
+  font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px;
+  border-radius: 8px; padding: 0 4px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid white;
+  font-family: 'Sora', sans-serif;
+}
+
+/* ── TRENDING CHIP ── */
+.trending-bar {
+  display: flex; gap: 8px; overflow-x: auto;
+  scrollbar-width: none; margin-bottom: 16px;
+}
+.trending-bar::-webkit-scrollbar { display: none; }
+
+.trend-chip {
+  flex-shrink: 0;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+.trend-chip:hover, .trend-chip.active {
+  background: var(--blue-500); color: white;
+  border-color: var(--blue-500);
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10, 22, 40, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal-sheet {
+  width: 100%;
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 20px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--gray-300);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+.modal-title {
+  font-size: 18px; font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  font-family: 'Sora', sans-serif;
+}
+
+.modal-textarea {
+  width: 100%;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 15px; line-height: 1.6;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text-primary);
+  background: var(--gray-100);
+  outline: none; resize: none;
+  min-height: 120px; margin-bottom: 12px;
+}
+.modal-textarea:focus {
+  border-color: var(--blue-400);
+  background: white;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.modal-tools {
+  display: flex; gap: 8px; margin-bottom: 16px;
+}
+.modal-tool {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  background: var(--gray-100);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px; color: var(--text-secondary);
+  cursor: pointer; border: none;
+  transition: all 0.2s;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.modal-tool:hover { background: var(--blue-100); color: var(--blue-500); }
+
+.modal-submit {
+  width: 100%;
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  color: white; border: none;
+  padding: 15px; border-radius: 14px;
+  font-size: 15px; font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(41, 121, 212, 0.4);
+  transition: all 0.2s;
+}
+.modal-submit:hover { transform: translateY(-1px); }
+
+/* Utility */
+.divider {
+  height: 1px; background: var(--border);
+  margin: 0 0 16px;
+}
+
+.section-label {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 10px;
+  font-family: 'Sora', sans-serif;
+}
+
+/* Pull to refresh indicator */
+.ptr-indicator {
+  text-align: center; padding: 10px 0 0;
+  font-size: 12px; color: var(--text-muted);
+  display: none;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--blue-900); color: white;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; pointer-events: none;
+  transition: all 0.3s;
+  white-space: nowrap;
+  z-index: 300;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Loaded from file placeholder */
+.file-preview {
+  background: var(--blue-100);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}
+.file-preview .file-icon { font-size: 24px; }
+.file-preview .file-info { flex: 1; }
+.file-preview .file-name { font-size: 13px; font-weight: 600; color: var(--blue-700); }
+.file-preview .file-size { font-size: 11px; color: var(--blue-500); }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="nav-logo">NEX<span>US</span></div>
+  <div class="nav-actions">
+    <a href="messages.html" class="nav-btn" title="メッセージ">💬</a>
+    <button class="nav-btn" onclick="showToast('通知はありません')">🔔</button>
+    <div class="nav-avatar" onclick="showToast('プロフィール')">田中</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main-wrapper">
+
+  <!-- STORIES -->
+  <div class="story-rail">
+    <div class="story-item story-add" onclick="openModal()">
+      <div class="story-ring">
+        <div class="story-avatar">＋</div>
+      </div>
+      <div class="story-label">投稿する</div>
+    </div>
+    <div class="story-item">
+      <div class="story-ring">
+        <div class="story-avatar" style="background:linear-gradient(135deg,#1a3f73,#2979d4)">佐</div>
+      </div>
+      <div class="story-label">佐藤さん</div>
+    </div>
+    <div class="story-item">
+      <div class="story-ring" style="background:linear-gradient(135deg,#5599e8,#93bff5)">
+        <div class="story-avatar">鈴</div>
+      </div>
+      <div class="story-label">鈴木さん</div>
+    </div>
+    <div class="story-item">
+      <div class="story-ring" style="background:linear-gradient(135deg,#4facfe,#1d5fa8)">
+        <div class="story-avatar">山</div>
+      </div>
+      <div class="story-label">山田さん</div>
+    </div>
+    <div class="story-item">
+      <div class="story-ring" style="background:linear-gradient(135deg,#2979d4,#4facfe)">
+        <div class="story-avatar">伊</div>
+      </div>
+      <div class="story-label">伊藤さん</div>
+    </div>
+    <div class="story-item">
+      <div class="story-ring" style="background:linear-gradient(135deg,#112d54,#1d5fa8)">
+        <div class="story-avatar">渡</div>
+      </div>
+      <div class="story-label">渡辺さん</div>
+    </div>
+  </div>
+
+  <!-- COMPOSER -->
+  <div class="composer">
+    <div class="composer-top">
+      <div class="composer-avatar">田中</div>
+      <textarea class="composer-input" placeholder="今日のできごとをシェアしよう..." rows="1"
+        onclick="openModal()" readonly></textarea>
+    </div>
+    <div class="composer-actions">
+      <div class="composer-tools">
+        <button class="tool-btn" onclick="openModal()" title="画像">🖼️</button>
+        <button class="tool-btn" onclick="openModal()" title="ファイル">📎</button>
+        <button class="tool-btn" onclick="openModal()" title="絵文字">😊</button>
+        <button class="tool-btn" onclick="openModal()" title="メンション">@</button>
+      </div>
+      <button class="post-btn" onclick="openModal()">投稿</button>
+    </div>
+  </div>
+
+  <!-- TRENDING CHIPS -->
+  <div class="trending-bar">
+    <div class="trend-chip active">全て</div>
+    <div class="trend-chip" onclick="setChip(this)">📣 お知らせ</div>
+    <div class="trend-chip" onclick="setChip(this)">💻 開発</div>
+    <div class="trend-chip" onclick="setChip(this)">🎉 イベント</div>
+    <div class="trend-chip" onclick="setChip(this)">🤝 HR</div>
+    <div class="trend-chip" onclick="setChip(this)">☕ 雑談</div>
+  </div>
+
+  <!-- FEED TABS -->
+  <div class="feed-tabs">
+    <button class="tab-btn active" onclick="switchTab(this)">タイムライン</button>
+    <button class="tab-btn" onclick="switchTab(this)">注目 🔥</button>
+    <button class="tab-btn" onclick="switchTab(this)">フォロー中</button>
+  </div>
+
+  <!-- POSTS -->
+  <div id="feed">
+
+    <!-- Post 1 -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:linear-gradient(135deg,#1a3f73,#2979d4)">佐藤</div>
+        <div class="post-meta">
+          <div class="post-name">佐藤 健一</div>
+          <div class="post-sub">
+            <span class="post-dept">開発部</span>
+            <span>42分前</span>
+          </div>
+        </div>
+        <button class="post-more">···</button>
+      </div>
+      <div class="post-body">
+        新機能のベータリリース、無事完了しました 🎉<br>
+        <span class="post-tag">#開発</span> <span class="post-tag">#リリース</span><br><br>
+        チームのみなさん、深夜までのサポートありがとうございました！来週はレトロを予定しています。詳細は別途共有します。
+      </div>
+      <div class="post-footer">
+        <button class="action-btn liked" onclick="toggleLike(this)">
+          <span class="icon">❤️</span> <span class="count">24</span>
+        </button>
+        <button class="action-btn" onclick="showToast('コメント機能')">
+          <span class="icon">💬</span> <span>7</span>
+        </button>
+        <button class="action-btn" onclick="showToast('リシェアしました')">
+          <span class="icon">🔄</span> <span>3</span>
+        </button>
+        <button class="action-btn" onclick="showToast('コピーしました')">
+          <span class="icon">↗️</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Post 2 (with image) -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:linear-gradient(135deg,#2979d4,#4facfe)">山田</div>
+        <div class="post-meta">
+          <div class="post-name">山田 花子</div>
+          <div class="post-sub">
+            <span class="post-dept">HR</span>
+            <span>1時間前</span>
+          </div>
+        </div>
+        <button class="post-more">···</button>
+      </div>
+      <div class="post-body">
+        今週の社内ランチ会、とても盛り上がりました☀️ 新入社員の皆さんも打ち解けてくれて嬉しい！来月もやりましょう。<br>
+        <span class="post-tag">#イベント</span> <span class="post-tag">#HR</span>
+      </div>
+      <div class="post-image-grid">
+        <div style="background:linear-gradient(135deg,#dceeff,#93bff5);height:130px;border-radius:0;display:flex;align-items:center;justify-content:center;font-size:40px;">🍱</div>
+        <div style="background:linear-gradient(135deg,#93bff5,#5599e8);height:130px;border-radius:0;display:flex;align-items:center;justify-content:center;font-size:40px;">🤝</div>
+      </div>
+      <div class="post-footer">
+        <button class="action-btn" onclick="toggleLike(this)">
+          <span class="icon">🤍</span> <span class="count">31</span>
+        </button>
+        <button class="action-btn">
+          <span class="icon">💬</span> <span>12</span>
+        </button>
+        <button class="action-btn" onclick="showToast('リシェアしました')">
+          <span class="icon">🔄</span> <span>5</span>
+        </button>
+        <button class="action-btn" onclick="showToast('コピーしました')">
+          <span class="icon">↗️</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Post 3 (with file) -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:linear-gradient(135deg,#112d54,#1a3f73)">鈴木</div>
+        <div class="post-meta">
+          <div class="post-name">鈴木 大輔</div>
+          <div class="post-sub">
+            <span class="post-dept">営業部</span>
+            <span>3時間前</span>
+          </div>
+        </div>
+        <button class="post-more">···</button>
+      </div>
+      <div class="post-body">
+        Q3営業報告書を共有します。今期は目標比115%達成！詳細はファイルをご確認ください 📊<br>
+        <span class="post-tag">#営業</span> <span class="post-tag">#報告</span>
+      </div>
+      <div class="file-preview" onclick="window.location.href='files.html'">
+        <div class="file-icon">📊</div>
+        <div class="file-info">
+          <div class="file-name">Q3_営業報告書_2024.xlsx</div>
+          <div class="file-size">Excel · 2.4 MB</div>
+        </div>
+        <span style="color:var(--blue-400);font-size:20px;">↗</span>
+      </div>
+      <div class="post-footer">
+        <button class="action-btn" onclick="toggleLike(this)">
+          <span class="icon">🤍</span> <span class="count">18</span>
+        </button>
+        <button class="action-btn">
+          <span class="icon">💬</span> <span>4</span>
+        </button>
+        <button class="action-btn" onclick="showToast('リシェアしました')">
+          <span class="icon">🔄</span> <span>2</span>
+        </button>
+        <button class="action-btn" onclick="showToast('コピーしました')">
+          <span class="icon">↗️</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Post 4 -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:linear-gradient(135deg,#1d5fa8,#2979d4)">伊藤</div>
+        <div class="post-meta">
+          <div class="post-name">伊藤 美咲</div>
+          <div class="post-sub">
+            <span class="post-dept">マーケティング</span>
+            <span>昨日</span>
+          </div>
+        </div>
+        <button class="post-more">···</button>
+      </div>
+      <div class="post-body">
+        来月の新製品キャンペーン、コンセプト固まりました！<br>
+        <span class="post-tag">#マーケティング</span> <span class="post-tag">#キャンペーン</span><br><br>
+        ご意見ある方はDMかコメントでぜひ。フィードバック大歓迎です 🙌
+      </div>
+      <div class="post-image" style="height:180px;background:linear-gradient(135deg,var(--blue-700),var(--accent));display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm)">
+        <span style="font-size:48px;color:rgba(255,255,255,0.7)">✨</span>
+      </div>
+      <div class="post-footer">
+        <button class="action-btn" onclick="toggleLike(this)">
+          <span class="icon">🤍</span> <span class="count">47</span>
+        </button>
+        <button class="action-btn">
+          <span class="icon">💬</span> <span>16</span>
+        </button>
+        <button class="action-btn" onclick="showToast('リシェアしました')">
+          <span class="icon">🔄</span> <span>9</span>
+        </button>
+        <button class="action-btn" onclick="showToast('コピーしました')">
+          <span class="icon">↗️</span>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /#feed -->
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active">
+    <span class="n-icon">🏠</span>
+    <span>ホーム</span>
+  </button>
+  <a href="files.html" class="nav-item">
+    <span class="n-icon">📁</span>
+    <span>ファイル</span>
+  </a>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+    <button class="nav-post-btn" onclick="openModal()">＋</button>
+  </div>
+  <a href="messages.html" class="nav-item" style="position:relative;">
+    <span class="n-icon">💬</span>
+    <span>メッセージ</span>
+    <span class="badge">3</span>
+  </a>
+  <button class="nav-item" onclick="showToast('プロフィール')">
+    <span class="n-icon">👤</span>
+    <span>プロフィール</span>
+  </button>
+</nav>
+
+<!-- POST MODAL -->
+<div class="modal-overlay" id="postModal" onclick="closeModalOutside(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">新しい投稿</div>
+    <textarea class="modal-textarea" id="postContent" placeholder="今日のできごとをシェアしよう...&#10;&#10;#タグ や @メンション も使えます"></textarea>
+    <div id="filePreviewArea"></div>
+    <div class="modal-tools">
+      <button class="modal-tool" onclick="triggerFileInput('image')">🖼️ 画像</button>
+      <button class="modal-tool" onclick="triggerFileInput('file')">📎 ファイル</button>
+      <button class="modal-tool">😊 絵文字</button>
+    </div>
+    <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+    <input type="file" id="fileInput" style="display:none" onchange="handleFileSelect(event)">
+    <button class="modal-submit" onclick="submitPost()">投稿する 🚀</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+function openModal() {
+  document.getElementById('postModal').classList.add('open');
+  setTimeout(() => document.getElementById('postContent').focus(), 400);
+}
+function closeModalOutside(e) {
+  if (e.target === e.currentTarget) closeModal();
+}
+function closeModal() {
+  document.getElementById('postModal').classList.remove('open');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function toggleLike(btn) {
+  btn.classList.toggle('liked');
+  const countEl = btn.querySelector('.count');
+  const icon = btn.querySelector('.icon');
+  const isLiked = btn.classList.contains('liked');
+  icon.textContent = isLiked ? '❤️' : '🤍';
+  countEl.textContent = parseInt(countEl.textContent) + (isLiked ? 1 : -1);
+}
+
+function switchTab(btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setChip(chip) {
+  document.querySelectorAll('.trend-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+}
+
+function triggerFileInput(type) {
+  document.getElementById(type === 'image' ? 'imageInput' : 'fileInput').click();
+}
+
+function handleImageSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const area = document.getElementById('filePreviewArea');
+  area.innerHTML = `<div class="file-preview"><div class="file-icon">🖼️</div><div class="file-info"><div class="file-name">${file.name}</div><div class="file-size">画像 · ${(file.size/1024).toFixed(0)} KB</div></div><button onclick="this.parentNode.remove()" style="border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-muted)">✕</button></div>`;
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const area = document.getElementById('filePreviewArea');
+  area.innerHTML = `<div class="file-preview"><div class="file-icon">📎</div><div class="file-info"><div class="file-name">${file.name}</div><div class="file-size">${(file.size/1024).toFixed(0)} KB</div></div><button onclick="this.parentNode.remove()" style="border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-muted)">✕</button></div>`;
+}
+
+function submitPost() {
+  const content = document.getElementById('postContent').value.trim();
+  if (!content) { showToast('内容を入力してください'); return; }
+  closeModal();
+  addPost(content);
+  document.getElementById('postContent').value = '';
+  document.getElementById('filePreviewArea').innerHTML = '';
+  showToast('投稿しました！🎉');
+}
+
+function addPost(content) {
+  const feed = document.getElementById('feed');
+  const card = document.createElement('div');
+  card.className = 'post-card';
+  card.style.animationDelay = '0s';
+  card.innerHTML = `
+    <div class="post-header">
+      <div class="post-avatar" style="background:linear-gradient(135deg,var(--blue-500),var(--accent))">田中</div>
+      <div class="post-meta">
+        <div class="post-name">田中 太郎</div>
+        <div class="post-sub"><span class="post-dept">あなた</span><span>たった今</span></div>
+      </div>
+      <button class="post-more">···</button>
+    </div>
+    <div class="post-body">${content.replace(/\n/g,'<br>').replace(/#(\S+)/g,'<span class="post-tag">#$1</span>').replace(/@(\S+)/g,'<span class="post-tag">@$1</span>')}</div>
+    <div class="post-footer">
+      <button class="action-btn" onclick="toggleLike(this)"><span class="icon">🤍</span><span class="count">0</span></button>
+      <button class="action-btn"><span class="icon">💬</span><span>0</span></button>
+      <button class="action-btn" onclick="showToast('リシェアしました')"><span class="icon">🔄</span><span>0</span></button>
+      <button class="action-btn" onclick="showToast('コピーしました')"><span class="icon">↗️</span></button>
+    </div>`;
+  feed.prepend(card);
+}
+</script>
+</body>
+</html>
