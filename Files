@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NEXUS — ファイル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue-900: #0a1628;
+  --blue-800: #0d1f3c;
+  --blue-700: #112d54;
+  --blue-600: #1a3f73;
+  --blue-500: #1d5fa8;
+  --blue-400: #2979d4;
+  --blue-300: #5599e8;
+  --blue-200: #93bff5;
+  --blue-100: #dceeff;
+  --accent: #4facfe;
+  --accent-glow: rgba(79, 172, 254, 0.25);
+  --text-primary: #0d1f3c;
+  --text-secondary: #4a6080;
+  --text-muted: #7a90aa;
+  --bg-main: #f4f7ff;
+  --bg-card: #ffffff;
+  --border: rgba(26, 63, 115, 0.1);
+  --shadow: 0 2px 20px rgba(13, 31, 60, 0.08);
+  --shadow-hover: 0 8px 40px rgba(13, 31, 60, 0.14);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --nav-height: 60px;
+  --bottom-nav-height: 68px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Noto Sans JP', 'Sora', sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+}
+
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-height);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+}
+.nav-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px; font-weight: 700;
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.nav-btn {
+  width: 38px; height: 38px;
+  border: none; background: var(--gray-100, #f0f4ff);
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue-600); font-size: 18px;
+  transition: all 0.2s;
+}
+.nav-btn:hover { background: var(--blue-100); }
+.nav-actions { display: flex; gap: 8px; }
+
+.main-wrapper {
+  max-width: 640px; margin: 0 auto;
+  padding: calc(var(--nav-height) + 16px) 16px 16px;
+}
+
+/* Storage summary */
+.storage-card {
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-500), var(--accent));
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
+  position: relative; overflow: hidden;
+  box-shadow: 0 8px 30px rgba(29, 95, 168, 0.4);
+  animation: slideUp 0.4s ease both;
+}
+.storage-card::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.storage-card::after {
+  content: '';
+  position: absolute; bottom: -60px; left: 20px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+.storage-label { font-size: 12px; opacity: 0.8; margin-bottom: 6px; font-family: 'Sora', sans-serif; font-weight: 500; letter-spacing: 0.5px; }
+.storage-used { font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+.storage-total { font-size: 13px; opacity: 0.8; margin-bottom: 16px; }
+.storage-bar {
+  background: rgba(255,255,255,0.25);
+  border-radius: 8px; height: 8px; margin-bottom: 16px;
+  overflow: hidden;
+}
+.storage-fill {
+  height: 100%; border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+  width: 38%;
+  transition: width 1s ease;
+}
+.storage-types { display: flex; gap: 16px; }
+.storage-type { display: flex; align-items: center; gap: 6px; font-size: 12px; opacity: 0.9; }
+.type-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Search */
+.search-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideUp 0.4s ease 0.05s both;
+}
+.search-icon { font-size: 17px; color: var(--text-muted); }
+.search-input {
+  flex: 1; border: none; outline: none; background: none;
+  font-size: 14px; color: var(--text-primary);
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.search-input::placeholder { color: var(--text-muted); }
+
+/* View toggle + sort */
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+  animation: slideUp 0.4s ease 0.1s both;
+}
+.view-toggle {
+  display: flex;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 3px; gap: 2px;
+  box-shadow: var(--shadow);
+}
+.view-btn {
+  width: 32px; height: 32px;
+  border: none; background: none;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: var(--text-muted);
+  cursor: pointer; transition: all 0.2s;
+}
+.view-btn.active {
+  background: var(--blue-500); color: white;
+}
+
+.sort-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 12px;
+  font-size: 12px; color: var(--text-secondary);
+  cursor: pointer; box-shadow: var(--shadow);
+  font-family: 'Noto Sans JP', sans-serif; font-weight: 500;
+}
+
+/* Category tabs */
+.cat-tabs {
+  display: flex; gap: 8px; overflow-x: auto;
+  scrollbar-width: none; margin-bottom: 16px;
+  animation: slideUp 0.4s ease 0.15s both;
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+.cat-tab.active {
+  background: var(--blue-500); color: white;
+  border-color: var(--blue-500);
+  box-shadow: 0 3px 10px rgba(41, 121, 212, 0.3);
+}
+
+/* Folder grid */
+.section-label {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 10px;
+  font-family: 'Sora', sans-serif;
+}
+
+.folder-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 20px;
+  animation: slideUp 0.4s ease 0.2s both;
+}
+
+.folder-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+.folder-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+
+.folder-icon-wrap {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin-bottom: 10px;
+}
+.folder-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+.folder-count { font-size: 11px; color: var(--text-muted); }
+
+/* File list */
+.file-list { display: flex; flex-direction: column; gap: 8px; animation: slideUp 0.4s ease 0.25s both; }
+
+.file-item {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+.file-item:hover { box-shadow: var(--shadow-hover); transform: translateX(2px); }
+
+.file-icon-wrap {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+
+.file-info { flex: 1; overflow: hidden; }
+.file-name { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
+.file-tag {
+  background: var(--blue-100); color: var(--blue-500);
+  padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 600;
+}
+
+.file-action {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border: none; background: var(--bg-main);
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text-muted);
+  transition: all 0.2s;
+}
+.file-action:hover { background: var(--blue-100); color: var(--blue-500); }
+
+/* Upload area */
+.upload-area {
+  border: 2.5px dashed var(--blue-200);
+  border-radius: var(--radius);
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer; transition: all 0.2s;
+  margin-bottom: 16px;
+  background: rgba(220, 238, 255, 0.3);
+  animation: slideUp 0.4s ease 0.3s both;
+}
+.upload-area:hover { border-color: var(--blue-400); background: var(--blue-100); }
+.upload-icon { font-size: 36px; margin-bottom: 10px; }
+.upload-title { font-size: 14px; font-weight: 600; color: var(--blue-500); margin-bottom: 4px; }
+.upload-sub { font-size: 12px; color: var(--text-muted); }
+
+/* Grid view */
+.file-grid { display: none; }
+.file-grid.active { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; animation: slideUp 0.4s ease both; }
+.file-list.hidden { display: none; }
+
+.grid-item {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden; cursor: pointer;
+  transition: all 0.2s; box-shadow: var(--shadow);
+}
+.grid-item:hover { transform: scale(1.03); box-shadow: var(--shadow-hover); }
+.grid-thumb {
+  height: 70px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.grid-name {
+  font-size: 10px; font-weight: 600; color: var(--text-primary);
+  padding: 6px 8px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; padding: 10px 0;
+  text-decoration: none; color: var(--text-muted);
+  font-size: 10px; font-weight: 500;
+  cursor: pointer; border: none; background: none;
+  font-family: 'Noto Sans JP', sans-serif;
+  position: relative; transition: all 0.2s;
+}
+.nav-item .n-icon { font-size: 22px; }
+.nav-item.active { color: var(--blue-500); }
+.nav-item.active::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 32px; height: 3px;
+  background: linear-gradient(90deg, var(--blue-500), var(--accent));
+  border-radius: 0 0 3px 3px;
+}
+.nav-post-btn {
+  width: 50px; height: 50px;
+  background: linear-gradient(135deg, var(--blue-500), var(--accent));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: white;
+  box-shadow: 0 4px 20px rgba(41, 121, 212, 0.45);
+  border: none; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.badge {
+  position: absolute; top: 6px; right: calc(50% - 14px);
+  background: #e0394b; color: white;
+  font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px;
+  border-radius: 8px; padding: 0 4px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid white;
+}
+.toast {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--blue-900); color: white;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; pointer-events: none; transition: all 0.3s;
+  white-space: nowrap; z-index: 300;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-title">ファイル</div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="triggerUpload()">＋</button>
+    <button class="nav-btn" onclick="showToast('検索')">🔍</button>
+  </div>
+</nav>
+<input type="file" id="uploadInput" multiple style="display:none" onchange="handleUpload(event)">
+
+<main class="main-wrapper">
+
+  <!-- Storage Summary -->
+  <div class="storage-card">
+    <div class="storage-label">ストレージ使用量</div>
+    <div class="storage-used">3.8 GB</div>
+    <div class="storage-total">/ 10 GB 使用中</div>
+    <div class="storage-bar"><div class="storage-fill" id="storageBar"></div></div>
+    <div class="storage-types">
+      <div class="storage-type"><div class="type-dot" style="background:rgba(255,255,255,0.9)"></div>ドキュメント 1.2GB</div>
+      <div class="storage-type"><div class="type-dot" style="background:rgba(255,255,255,0.65)"></div>画像 1.8GB</div>
+      <div class="storage-type"><div class="type-dot" style="background:rgba(255,255,255,0.4)"></div>その他 0.8GB</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" placeholder="ファイルを検索...">
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="view-toggle">
+      <button class="view-btn active" id="listViewBtn" onclick="setView('list')" title="リスト">≡</button>
+      <button class="view-btn" id="gridViewBtn" onclick="setView('grid')" title="グリッド">⊞</button>
+    </div>
+    <button class="sort-btn" onclick="showToast('並び替え')">📅 日付順 ▼</button>
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="cat-tabs">
+    <button class="cat-tab active" onclick="setCat(this)">📂 すべて</button>
+    <button class="cat-tab" onclick="setCat(this)">📄 ドキュメント</button>
+    <button class="cat-tab" onclick="setCat(this)">🖼️ 画像</button>
+    <button class="cat-tab" onclick="setCat(this)">📊 スプレッド</button>
+    <button class="cat-tab" onclick="setCat(this)">📊 スライド</button>
+    <button class="cat-tab" onclick="setCat(this)">🎵 動画</button>
+  </div>
+
+  <!-- Upload Area -->
+  <div class="upload-area" onclick="triggerUpload()" id="uploadArea">
+    <div class="upload-icon">☁️</div>
+    <div class="upload-title">ファイルをアップロード</div>
+    <div class="upload-sub">タップして選択、またはドラッグ&ドロップ</div>
+  </div>
+
+  <!-- Folders -->
+  <div class="section-label">フォルダ</div>
+  <div class="folder-grid">
+    <div class="folder-card" onclick="showToast('開発部フォルダ')">
+      <div class="folder-icon-wrap" style="background:linear-gradient(135deg,#dceeff,#93bff5)">💻</div>
+      <div class="folder-name">開発部</div>
+      <div class="folder-count">24 ファイル</div>
+    </div>
+    <div class="folder-card" onclick="showToast('営業部フォルダ')">
+      <div class="folder-icon-wrap" style="background:linear-gradient(135deg,#e8f4ff,#c8d6f0)">📈</div>
+      <div class="folder-name">営業部</div>
+      <div class="folder-count">18 ファイル</div>
+    </div>
+    <div class="folder-card" onclick="showToast('マーケフォルダ')">
+      <div class="folder-icon-wrap" style="background:linear-gradient(135deg,#93bff5,#5599e8)">📣</div>
+      <div class="folder-name">マーケティング</div>
+      <div class="folder-count">31 ファイル</div>
+    </div>
+    <div class="folder-card" onclick="showToast('共有フォルダ')">
+      <div class="folder-icon-wrap" style="background:linear-gradient(135deg,#5599e8,#2979d4)">🤝</div>
+      <div class="folder-name">共有資料</div>
+      <div class="folder-count">12 ファイル</div>
+    </div>
+  </div>
+
+  <!-- File List -->
+  <div class="section-label">最近のファイル</div>
+
+  <div class="file-list" id="fileList">
+    <div class="file-item">
+      <div class="file-icon-wrap" style="background:#e8f5e9">📊</div>
+      <div class="file-info">
+        <div class="file-name">Q3_営業報告書_2024.xlsx</div>
+        <div class="file-meta">
+          <span class="file-tag">Excel</span>
+          <span>2.4 MB</span>
+          <span>·</span>
+          <span>鈴木 大輔</span>
+        </div>
+      </div>
+      <button class="file-action" onclick="showToast('オプション')">···</button>
+    </div>
+
+    <div class="file-item">
+      <div class="file-icon-wrap" style="background:#e3f2fd">📘</div>
+      <div class="file-info">
+        <div class="file-name">開発仕様書_v3.2.docx</div>
+        <div class="file-meta">
+          <span class="file-tag">Word</span>
+          <span>845 KB</span>
+          <span>·</span>
+          <span>佐藤 健一</span>
+        </div>
+      </div>
+      <button class="file-action" onclick="showToast('オプション')">···</button>
+    </div>
+
+    <div class="file-item">
+      <div class="file-icon-wrap" style="background:#fff3e0">📙</div>
+      <div class="file-info">
+        <div class="file-name">会社紹介_2024Q4.pptx</div>
+        <div class="file-meta">
+          <span class="file-tag">PPT</span>
+          <span>12.1 MB</span>
+          <span>·</span>
+          <span>伊藤 美咲</span>
+        </div>
+      </div>
+      <button class="file-action" onclick="showToast('オプション')">···</button>
+    </div>
+
+    <div class="file-item">
+      <div class="file-icon-wrap" style="background:#fce4ec">🖼️</div>
+      <div class="file-info">
+        <div class="file-name">ブランドロゴ_一式.zip</div>
+        <div class="file-meta">
+          <span class="file-tag">ZIP</span>
+          <span>8.7 MB</span>
+          <span>·</span>
+          <span>山田 花子</span>
+        </div>
+      </div>
+      <button class="file-action" onclick="showToast('オプション')">···</button>
+    </div>
+
+    <div class="file-item">
+      <div class="file-icon-wrap" style="background:#f3e5f5">📋</div>
+      <div class="file-info">
+        <div class="file-name">採用方針_2024年度.pdf</div>
+        <div class="file-meta">
+          <span class="file-tag">PDF</span>
+          <span>320 KB</span>
+          <span>·</span>
+          <span>渡辺 修</span>
+        </div>
+      </div>
+      <button class="file-action" onclick="showToast('オプション')">···</button>
+    </div>
+
+    <div class="file-item">
+      <div class="file-icon-wrap" style="background:#e8f5e9">📊</div>
+      <div class="file-info">
+        <div class="file-name">予算計画_FY2025.xlsx</div>
+        <div class="file-meta">
+          <span class="file-tag">Excel</span>
+          <span>1.1 MB</span>
+          <span>·</span>
+          <span>田中 太郎</span>
+        </div>
+      </div>
+      <button class="file-action" onclick="showToast('オプション')">···</button>
+    </div>
+  </div>
+
+  <!-- Grid View (hidden by default) -->
+  <div class="file-grid" id="fileGrid">
+    <div class="grid-item" onclick="showToast('Q3営業報告書')">
+      <div class="grid-thumb" style="background:#e8f5e9">📊</div>
+      <div class="grid-name">Q3_報告書.xlsx</div>
+    </div>
+    <div class="grid-item" onclick="showToast('開発仕様書')">
+      <div class="grid-thumb" style="background:#e3f2fd">📘</div>
+      <div class="grid-name">仕様書_v3.2.docx</div>
+    </div>
+    <div class="grid-item" onclick="showToast('会社紹介')">
+      <div class="grid-thumb" style="background:#fff3e0">📙</div>
+      <div class="grid-name">会社紹介.pptx</div>
+    </div>
+    <div class="grid-item" onclick="showToast('ブランドロゴ')">
+      <div class="grid-thumb" style="background:#fce4ec">🖼️</div>
+      <div class="grid-name">ロゴ一式.zip</div>
+    </div>
+    <div class="grid-item" onclick="showToast('採用方針')">
+      <div class="grid-thumb" style="background:#f3e5f5">📋</div>
+      <div class="grid-name">採用方針.pdf</div>
+    </div>
+    <div class="grid-item" onclick="showToast('予算計画')">
+      <div class="grid-thumb" style="background:#e8f5e9">📊</div>
+      <div class="grid-name">予算計画.xlsx</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="n-icon">🏠</span><span>ホーム</span>
+  </a>
+  <button class="nav-item active">
+    <span class="n-icon">📁</span><span>ファイル</span>
+  </button>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+    <button class="nav-post-btn" onclick="triggerUpload()">＋</button>
+  </div>
+  <a href="messages.html" class="nav-item" style="position:relative;">
+    <span class="n-icon">💬</span><span>メッセージ</span>
+    <span class="badge">3</span>
+  </a>
+  <button class="nav-item" onclick="showToast('プロフィール')">
+    <span class="n-icon">👤</span><span>プロフィール</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Animate storage bar
+setTimeout(() => {
+  document.getElementById('storageBar').style.width = '38%';
+}, 300);
+
+function setView(v) {
+  const list = document.getElementById('fileList');
+  const grid = document.getElementById('fileGrid');
+  const lb = document.getElementById('listViewBtn');
+  const gb = document.getElementById('gridViewBtn');
+  if (v === 'grid') {
+    list.classList.add('hidden');
+    grid.classList.add('active');
+    lb.classList.remove('active');
+    gb.classList.add('active');
+  } else {
+    list.classList.remove('hidden');
+    grid.classList.remove('active');
+    lb.classList.add('active');
+    gb.classList.remove('active');
+  }
+}
+
+function setCat(btn) {
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function triggerUpload() {
+  document.getElementById('uploadInput').click();
+}
+
+function handleUpload(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(f => {
+    const icons = { 'pdf': '📋', 'xlsx': '📊', 'xls': '📊', 'docx': '📘', 'doc': '📘', 'pptx': '📙', 'ppt': '📙', 'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️', 'zip': '📦', 'mp4': '🎬', 'mp3': '🎵' };
+    const ext = f.name.split('.').pop().toLowerCase();
+    const icon = icons[ext] || '📄';
+    const colors = { 'pdf': '#f3e5f5', 'xlsx': '#e8f5e9', 'xls': '#e8f5e9', 'docx': '#e3f2fd', 'doc': '#e3f2fd', 'pptx': '#fff3e0', 'jpg': '#fce4ec', 'png': '#fce4ec', 'zip': '#f0f4ff' };
+    const bg = colors[ext] || '#f0f4ff';
+    const tags = { 'pdf': 'PDF', 'xlsx': 'Excel', 'xls': 'Excel', 'docx': 'Word', 'doc': 'Word', 'pptx': 'PPT', 'jpg': '画像', 'png': '画像', 'zip': 'ZIP' };
+    const tag = tags[ext] || 'ファイル';
+    const size = (f.size / 1024).toFixed(0) + ' KB';
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    item.style.animation = 'slideUp 0.3s ease both';
+    item.innerHTML = `<div class="file-icon-wrap" style="background:${bg}">${icon}</div><div class="file-info"><div class="file-name">${f.name}</div><div class="file-meta"><span class="file-tag">${tag}</span><span>${size}</span><span>·</span><span>田中 太郎</span></div></div><button class="file-action" onclick="showToast('オプション')">···</button>`;
+    document.getElementById('fileList').prepend(item);
+  });
+  showToast(`${files.length}件アップロードしました 📁`);
+  e.target.value = '';
+}
+
+// Drag & Drop
+const ua = document.getElementById('uploadArea');
+ua.addEventListener('dragover', e => { e.preventDefault(); ua.style.borderColor = 'var(--blue-400)'; ua.style.background = 'var(--blue-100)'; });
+ua.addEventListener('dragleave', () => { ua.style.borderColor = ''; ua.style.background = ''; });
+ua.addEventListener('drop', e => {
+  e.preventDefault(); ua.style.borderColor = ''; ua.style.background = '';
+  const files = Array.from(e.dataTransfer.files);
+  if (files.length) {
+    showToast(`${files.length}件アップロードしました 📁`);
+  }
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
